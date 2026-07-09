@@ -1,7 +1,6 @@
 // ============================================
 // RENDER - drawing only. No game logic here.
-// Camera + visibility: I only see players in my
-// room AND my match instance.
+// Camera + match visibility + trial tiles.
 // ============================================
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -14,11 +13,20 @@ function getCamera(gameState, myId) {
   return { x: 0, y: 0 };
 }
 
+// My trial state, or null
+function getMyTrial(gameState, me) {
+  if (me && me.matchId !== null && gameState.trials && gameState.trials[me.matchId]) {
+    return gameState.trials[me.matchId];
+  }
+  return null;
+}
+
 function drawWorld(world, gameState, myId) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!world) return;
 
   const me = gameState && gameState.players ? gameState.players[myId] : null;
+  const myTrial = getMyTrial(gameState, me);
   const cam = getCamera(gameState, myId);
 
   ctx.save();
@@ -34,12 +42,22 @@ function drawWorld(world, gameState, myId) {
   if (world.zones) {
     for (const zone of world.zones) {
       let color = zone.color;
-      // QueueZone turns dark red when full (locked)
       if (zone.id === "QueueZone" && gameState && gameState.queue && gameState.queue.isFull) {
         color = "#5a1010";
       }
       ctx.fillStyle = color;
       ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
+    }
+  }
+
+  // Trial tiles (only my match's trial)
+  if (myTrial && myTrial.tiles) {
+    for (const tile of myTrial.tiles) {
+      ctx.fillStyle = tile.danger ? "#cc2222" : "#556677";
+      ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+      ctx.strokeStyle = "#222222";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(tile.x, tile.y, tile.width, tile.height);
     }
   }
 
@@ -60,18 +78,24 @@ function drawWorld(world, gameState, myId) {
         }
       }
 
-      // Show MY match timer only
-      if (screen.id === "MatchTimerScreen" && me && me.matchId !== null &&
-          gameState.matchTimers && gameState.matchTimers[me.matchId] !== undefined) {
+      // Trial text on the match screen
+      if (screen.id === "MatchTimerScreen" && myTrial) {
         ctx.fillStyle = "#ffff00";
-        ctx.font = "bold 26px Arial";
+        ctx.font = "bold 22px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(gameState.matchTimers[me.matchId] + "s", screen.x, screen.y);
+        let text;
+        if (myTrial.phase === "choose") {
+          text = "Choose a tile — " + myTrial.seconds + "s";
+        } else {
+          text = "Danger revealed!";
+        }
+        ctx.fillText("Round " + myTrial.round + "/" + myTrial.totalRounds + "  |  " + text,
+          screen.x, screen.y);
       }
     }
   }
 
-  // Players — visibility rule: same room + same match instance
+  // Players (same room + same match instance)
   if (gameState && gameState.players && me) {
     for (const id in gameState.players) {
       const p = gameState.players[id];
@@ -83,6 +107,20 @@ function drawWorld(world, gameState, myId) {
       ctx.fillStyle = (id === myId) ? "#00ff00" : "#00aaff";
       ctx.fill();
     }
+  }
+
+  // Big center message for eliminated players (during reveal)
+  if (myTrial && myTrial.phase === "reveal" &&
+      myTrial.eliminatedIds && myTrial.eliminatedIds.includes(myId) && me) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillRect(me.x - 220, me.y - 120, 440, 80);
+    ctx.fillStyle = "#ff4444";
+    ctx.font = "bold 28px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("ELIMINATED!", me.x, me.y - 88);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 20px Arial";
+    ctx.fillText("Returning to lobby in " + myTrial.seconds + "...", me.x, me.y - 58);
   }
 
   ctx.restore();
