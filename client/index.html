@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <title>Game Prototype</title>
   <style>
-    body { margin: 0; background: #222; color: white; font-family: Arial; }
-    #status { padding: 8px; }
-    canvas { display: block; margin: 0 auto; background: #111; }
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #211e38; }
+    #status {
+      position: absolute; top: 8px; left: 8px;
+      color: #efe9db; font-family: monospace; font-size: 13px;
+      z-index: 10;
+    }
+    canvas { display: block; }
   </style>
 </head>
 <body>
   <div id="status">Connecting...</div>
-  <canvas id="game" width="800" height="600"></canvas>
+  <canvas id="game"></canvas>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/render.js"></script>

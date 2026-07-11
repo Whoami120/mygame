@@ -1,22 +1,23 @@
 // ============================================
 // GRIM LOBBY - map data file (DATA ONLY)
-// Everything about THIS lobby design lives here:
-// layout, zones, points, and colors.
-// A new lobby later = a new file like this one.
+// This lobby uses a background image. All zones
+// and points are aligned to image coordinates.
 // ============================================
 
 const map = {
   id: "GrimLobby",
 
-  // Colors of this lobby (renderer reads these)
+  // Background art of this lobby (image pixels = world units)
+  background: { file: "assets/grimLobby.png", width: 1466, height: 1058 },
+
   palette: {
     background: "#211e38",
     floorBase:  "#4a4570",
-    floorAlt:   "#504b78",
+    floorAlt:   "#4e4974",
     wallBase:   "#3a365a",
     wallLine:   "#332f52",
     zoneBase:   "#56517f",
-    zoneAlt:    "#5c5788",
+    zoneAlt:    "#5a5586",
     stone:      "#565180",
     stoneDark:  "#4f4a78",
     voidDark:   "#161328",
@@ -30,30 +31,30 @@ const map = {
     textDim:    "#8f88b8"
   },
 
-  // Height of the decorative back wall above the lobby floor
-  wallHeight: 180,
+  wallHeight: 180, // used only by maps without a background image
 
   rooms: [
-    { id: "LobbyRoom", x: 0, y: 0,    width: 1300, height: 900 },
-    { id: "MatchRoom", x: 0, y: 1400, width: 800,  height: 500 }
+    { id: "LobbyRoom", x: 90, y: 340, width: 1290, height: 610 },
+    { id: "MatchRoom", x: 0, y: 1400, width: 800, height: 500 }
   ],
 
   zones: [
-    // Big queue zone in front of the gate
-    { id: "QueueZone", x: 460, y: 130, width: 380, height: 420 },
-    // The gate opening at the top wall
-    { id: "TrialGate", x: 590, y: 0,   width: 120, height: 30 }
+    { id: "QueueZone", x: 430, y: 430, width: 620, height: 400 },
+    { id: "TrialGate", x: 665, y: 340, width: 150, height: 30 }
   ],
 
   screens: [
-    { id: "TrialGateScreen",  x: 950, y: -80 },   // on the wall, right of the gate
+    // The ornate frame at the top-right of the image
+    { id: "TrialGateScreen",  x: 1195, y: 185 },
     { id: "MatchTimerScreen", x: 400, y: 1440 }
   ],
 
   points: {
-    LobbySpawn: { x: 170, y: 560 },   // grave door position (door art comes later)
+    LobbySpawn: { x: 215, y: 760 },  // at the grave door steps
     MatchSpawn: { x: 400, y: 1650 }
-  }
+  },
+
+  decorations: [] // baked into the background image now
 };
 
 module.exports = map;
